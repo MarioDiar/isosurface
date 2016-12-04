@@ -3563,6 +3563,7 @@
 		B16030561DF3AE59006C00ED /* Verdict.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = Verdict.doc; sourceTree = "<group>"; };
 		B16030571DF3AE59006C00ED /* Verdict.htm */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = Verdict.htm; sourceTree = "<group>"; };
 		B16030581DF3AE59006C00ED /* verdict_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = verdict_test.cpp; sourceTree = "<group>"; };
+		B160311C1DF3B865006C00ED /* quarter.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; name = quarter.1; path = ../../../../../Desktop/quarter.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3792,6 +3793,7 @@
 			isa = PBXGroup;
 			children = (
 				B16023131DF320B2006C00ED /* main.cpp */,
+				B160311C1DF3B865006C00ED /* quarter.1 */,
 			);
 			path = isosurface;
 			sourceTree = "<group>";
