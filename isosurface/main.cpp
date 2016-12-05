@@ -3,8 +3,14 @@
 
 #include "stdio.h"
 #include "math.h"
-#include "GLUT/glut.h"
+
 #include "iostream"
+
+#if defined __APPLE__
+    #include "GLUT/glut.h"
+#else
+    #include "GL/glut.h"
+#endif
 
 struct GLvector {
     GLfloat fX;
