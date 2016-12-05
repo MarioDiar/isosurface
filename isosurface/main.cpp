@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "math.h"
 #include "GLUT/glut.h"
+#include "iostream"
 
 struct GLvector {
     GLfloat fX;
@@ -14,8 +15,12 @@ struct GLvector {
 GLint iDataSetSize = 16;
 GLfloat fStepSize = 1.0/ iDataSetSize;
 GLfloat fTime = 0.0;
+GLfloat fTimeY = 0.0;
 GLvector sSourcePoint[3];
-GLfloat fTargetValue = 48.0;
+GLfloat fTargetValue = 7.0;
+//GLfloat fTargetValue = 48.0;
+static GLfloat fPitch = 0.0;
+static GLfloat fYaw   = 0.0;
 
 // Variables for lightning
 GLfloat afPropertiesAmbient [] = {0.50, 0.50, 0.50, 1.00};
@@ -43,7 +48,7 @@ void drawScene();
 void processSpecialKeys(int iKey, int iX, int iY);
 
 GLvoid vPrintHelp();
-GLvoid vSetTime(GLfloat fTime);
+GLvoid vSetTime(GLfloat fTime, GLfloat fTimeY);
 GLfloat fSample(GLfloat fX, GLfloat fY, GLfloat fZ);
 void resize(GLsizei iWidth, GLsizei iHeight);
 
@@ -66,15 +71,14 @@ int main(int argc, char **argv) {
     glutDisplayFunc(drawScene);
     glutIdleFunc(idle);
     glutReshapeFunc(resize);
-    //    glutKeyboardFunc( vKeyboard );
+    //glutKeyboardFunc( vKeyboard );
     glutSpecialFunc(processSpecialKeys);
     
-    glClearColor( 0.0, 0.0, 0.0, 1.0 );
+    glClearColor( 169.0/255.0, 169.0/255.0, 169.0/255.0, 1.0 );
     glClearDepth( 1.0 );
     
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
-//    glPolygonMode(GL_FRONT_AND_BACK, ePolygonMode);
     
     glLightfv( GL_LIGHT0, GL_AMBIENT,  afPropertiesAmbient);
     glLightfv( GL_LIGHT0, GL_DIFFUSE,  afPropertiesDiffuse);
@@ -83,10 +87,10 @@ int main(int argc, char **argv) {
     
     glEnable( GL_LIGHT0 );
     
-    glMaterialfv(GL_BACK,  GL_AMBIENT,   afAmbientGreen);
-    glMaterialfv(GL_BACK,  GL_DIFFUSE,   afDiffuseGreen);
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   afAmbientBlue);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   afDiffuseBlue);
+    glMaterialfv(GL_BACK,  GL_AMBIENT,   afAmbientRed);
+    glMaterialfv(GL_BACK,  GL_DIFFUSE,   afDiffuseRed);
+    glMaterialfv(GL_FRONT, GL_AMBIENT,   afAmbientWhite);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE,   afDiffuseWhite);
     glMaterialfv(GL_FRONT, GL_SPECULAR,  afSpecularWhite);
     glMaterialf( GL_FRONT, GL_SHININESS, 25.0);
     
@@ -101,7 +105,53 @@ void idle() {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
+    float fraction = 0.1f;
+    int mod = glutGetModifiers();
     
+    switch (key) {
+            // Alt + Left Key = Rotate - on Y axis
+            // Left Key = Move camera to left
+        case GLUT_KEY_LEFT :
+            if (mod == GLUT_ACTIVE_ALT) {
+                fYaw -= 0.5;
+            } else if (mod == GLUT_ACTIVE_SHIFT) {
+                fTargetValue -= 0.5;
+            } else {
+                fTime -= 0.1;
+            }
+            break;
+            // Alt + Right Key = Rotate + on Y axis
+            // Right Key = Move camera to Right
+        case GLUT_KEY_RIGHT :
+            if (mod == GLUT_ACTIVE_ALT) {
+                fYaw += 0.5;
+            } else if (mod == GLUT_ACTIVE_SHIFT) {
+                fTargetValue += 0.5;
+            } else {
+                fTime += 0.1;
+            }
+            break;
+            // UP Key = Move camera UP
+            // Shift + UP Key = Zoom out
+            // Alt + UP = Rotate on X axis
+        case GLUT_KEY_UP :
+            if (mod == GLUT_ACTIVE_ALT) {
+                fPitch += 0.5;
+            } else {
+                fTimeY += 0.1;
+            }
+            break;
+            // Down Key = Move camera Down
+            // Shift + UP Key = Zoom in
+            // Alt + UP = Rotate on X axis other direction
+        case GLUT_KEY_DOWN :
+            if (mod == GLUT_ACTIVE_ALT) {
+                fPitch -= 0.5;
+            } else {
+                fTimeY += 0.1;
+            }
+            break;
+    }
 }
 
 void mouseButton(int button, int state, int x, int y) {
@@ -109,29 +159,19 @@ void mouseButton(int button, int state, int x, int y) {
 }
 
 void drawScene() {
-    static GLfloat fPitch = 0.0;
-    static GLfloat fYaw   = 0.0;
-    static GLfloat fTime = 0.0;
-    
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    
     glPushMatrix();
     
-    fPitch += 4.0;
-    fYaw   += 2.5;
-    
-    fTime  += 0.025;
-    
-    vSetTime(fTime);
+    vSetTime(fTime, fTimeY);
     
     glTranslatef(0.0, 0.0, -1.0);
     glRotatef( -fPitch, 1.0, 0.0, 0.0);
-    glRotatef(     0.0, 0.0, 1.0, 0.0);
-    glRotatef(    fYaw, 0.0, 0.0, 1.0);
+    glRotatef(0.0, 0.0, 1.0, 0.0);
+    glRotatef(fYaw, 0.0, 1.0, 0.0);
     
     glPushAttrib(GL_LIGHTING_BIT);
     glDisable(GL_LIGHTING);
-    glColor3f(1.0, 1.0, 1.0);
+    glColor3f(1.0, 0.0, 0.0);
     glutWireCube(1.0);
     glPopAttrib();
     
@@ -142,7 +182,6 @@ void drawScene() {
     vMarchingCubes();
     glEnd();
     glPopMatrix();
-    
     
     glPopMatrix();
     
@@ -200,43 +239,48 @@ static const GLfloat a2fEdgeDirection[12][3] = {
 
 //Generate a sample data set.  fSample1(), fSample2() and fSample3() define three scalar fields whose
 // values vary by the X,Y and Z coordinates and by the fTime value set by vSetTime()
-GLvoid vSetTime(GLfloat fNewTime) {
+GLvoid vSetTime(GLfloat fNewTime, GLfloat fNewTimeY) {
     GLfloat fOffset;
+    GLfloat fOffsetY;
     GLint iSourceNum;
     
-    for(iSourceNum = 0; iSourceNum < 3; iSourceNum++)
-    {
+    for(iSourceNum = 0; iSourceNum < 3; iSourceNum++) {
         sSourcePoint[iSourceNum].fX = 0.5;
         sSourcePoint[iSourceNum].fY = 0.5;
         sSourcePoint[iSourceNum].fZ = 0.5;
     }
     
     fTime = fNewTime;
+    fTimeY = fNewTimeY;
+    
+    fOffsetY = 1.0 + sinf(fTimeY);
     fOffset = 1.0 + sinf(fTime);
+    
     sSourcePoint[0].fX *= fOffset;
-    sSourcePoint[1].fY *= fOffset;
-    sSourcePoint[2].fZ *= fOffset;
+    sSourcePoint[1].fX *= fOffset;
+    sSourcePoint[2].fX *= fOffset;
+    
+    sSourcePoint[0].fY *= fOffsetY;
+    sSourcePoint[1].fY *= fOffsetY;
+    sSourcePoint[2].fY *= fOffsetY;
 }
 
-//fSample finds the distance of (fX, fY, fZ) from three moving points
 GLfloat fSample(GLfloat fX, GLfloat fY, GLfloat fZ) {
-    GLdouble fResult = 0.0;
-    GLdouble fDx, fDy, fDz;
-    fDx = fX - sSourcePoint[0].fX;
-    fDy = fY - sSourcePoint[0].fY;
-    fDz = fZ - sSourcePoint[0].fZ;
-    fResult += 0.5/(fDx*fDx + fDy*fDy + fDz*fDz);
     
-    fDx = fX - sSourcePoint[1].fX;
-    fDy = fY - sSourcePoint[1].fY;
-    fDz = fZ - sSourcePoint[1].fZ;
-    fResult += 1.0/(fDx*fDx + fDy*fDy + fDz*fDz);
+    GLfloat fResult;
     
-    fDx = fX - sSourcePoint[2].fX;
-    fDy = fY - sSourcePoint[2].fY;
-    fDz = fZ - sSourcePoint[2].fZ;
-    fResult += 1.5/(fDx*fDx + fDy*fDy + fDz*fDz);
+    fX-=sSourcePoint[0].fX;
+    fY-=sSourcePoint[0].fY;
+    fZ-=sSourcePoint[0].fZ;
     
+    // Cylinder
+    fResult= fX*fX+fZ*fZ;
+  
+    // Parabola
+    //fResult = 4*(fX*fX) + 9*(fY*fY) + fZ;
+    
+
+    fResult = 1.5/fResult;
     return fResult;
 }
 
@@ -297,6 +341,7 @@ GLvoid vGetColor(GLvector &rfColor, GLvector &rfPosition, GLvector &rfNormal) {
 
 //vMarchCube1 performs the Marching Cubes algorithm on a single cube
 GLvoid vMarchCube(GLfloat fX, GLfloat fY, GLfloat fZ, GLfloat fScale) {
+    
     extern GLint aiCubeEdgeFlags[256];
     extern GLint a2iTriangleConnectionTable[256][16];
     
